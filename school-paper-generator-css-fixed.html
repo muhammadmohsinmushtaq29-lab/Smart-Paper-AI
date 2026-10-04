@@ -1,0 +1,338 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>School Paper Generator</title><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap">
+<style>
+:root{--bg:#f3f5fb;--c:#fff;--t:#1e2433;--m:#69718a;--p:#3b5bdb;--b:#dde3ef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#12151f;--c:#1b2030;--t:#e8ebf5;--m:#9aa3bd;--b:#2c3350}}
+:root[data-theme=dark]{--bg:#12151f;--c:#1b2030;--t:#e8ebf5;--m:#9aa3bd;--b:#2c3350}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:.2s}
+header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--c);border-bottom:1px solid var(--b);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+header b{font-size:17px}.sp{flex:1}
+button,.btn{font:inherit;border:1px solid var(--b);background:var(--c);color:var(--t);padding:8px 14px;border-radius:10px;cursor:pointer;transition:.15s}
+button:hover{border-color:var(--p)}button.p{background:var(--p);color:#fff;border-color:var(--p)}button.d{color:#d6336c}
+button.big{padding:14px 26px;font-size:16px;font-weight:600}
+input,select,textarea{font:inherit;width:100%;padding:9px 11px;border:1px solid var(--b);border-radius:10px;background:var(--bg);color:var(--t)}
+label{font-size:12px;color:var(--m);font-weight:600;display:block;margin-bottom:3px}
+.layout{display:flex;min-height:calc(100vh - 120px)}
+nav{width:210px;padding:14px;background:var(--c);border-right:1px solid var(--b);display:flex;flex-direction:column;gap:4px;flex:none}
+nav a{padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--m)}nav a.on,nav a:hover{background:var(--p);color:#fff}
+main{flex:1;padding:22px;min-width:0;max-width:1100px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(20,30,70,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stat{font-size:30px;font-weight:700;color:var(--p)}
+.hero{text-align:center;padding:50px 16px}.hero h1{font-size:clamp(30px,6vw,52px);margin:8px 0}.hero p{max-width:640px;margin:10px auto 24px;color:var(--m)}
+.view{display:none}.view.on{display:block}
+footer{text-align:center;padding:20px;color:var(--m);font-size:13px;border-top:1px solid var(--b)}
+#paper{background:#fff;color:#000;width:100%;max-width:794px;margin:0 auto;padding:40px 46px;font:14px/1.55 Georgia,"Times New Roman",serif;box-shadow:0 6px 30px rgba(0,0,0,.18);overflow-x:auto}
+#paper h1{font-size:22px;text-align:center;margin:4px 0;text-transform:uppercase}#paper h2{font-size:15px;text-align:center;margin:2px 0}
+#paper .hd{text-align:center;border-bottom:2px solid #000;padding-bottom:10px}
+#paper .lg{width:70px;height:70px;object-fit:contain;display:block;margin:0 auto 4px;font-size:44px}
+#paper .meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;margin:10px 0}
+#paper .sec{background:#eee;border:1px solid #000;padding:3px 10px;font-weight:700;margin:16px 0 8px;display:flex;justify-content:space-between}
+#paper .q{display:flex;justify-content:space-between;gap:12px;margin:7px 0}#paper .o{display:grid;grid-template-columns:1fr 1fr;margin:2px 0 0 20px}
+#paper .tr{font-size:34px;letter-spacing:12px;color:#aaa;font-family:Arial,sans-serif;margin:4px 0}#paper .q>div{white-space:pre-line}#paper .pf{text-align:center;font-size:11px;border-top:1px solid #999;margin-top:24px;padding-top:6px}
+@media(max-width:760px){.layout{flex-direction:column}nav{width:100%;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--b)}nav a{white-space:nowrap}main{padding:14px}#paper{padding:22px 16px}}
+#paper[dir=rtl]{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Noto Naskh Arabic",Tahoma,serif;line-height:2.2}#paper[dir=rtl] .o{margin:2px 20px 0 0}
+@page{size:A4;margin:14mm;@bottom-center{content:"Page " counter(page)}}
+@media print{body *{visibility:hidden}#paper,#paper *{visibility:visible}#paper{position:absolute;left:0;top:0;box-shadow:none;max-width:none;padding:0}}
+
+/* Premium motion + subtle 3D interaction layer */
+:root{--motion-ease:cubic-bezier(.2,.8,.2,1)}
+.card,button,.hero h1,.hero>div:first-child{transform-style:preserve-3d}
+.card{transition:transform .35s var(--motion-ease),box-shadow .35s var(--motion-ease)}
+.card:hover{transform:perspective(900px) translateY(-3px) rotateX(.6deg);box-shadow:0 14px 32px rgba(35,55,120,.12)}
+button{transition:transform .22s var(--motion-ease),box-shadow .22s,border-color .2s}
+button:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(59,91,219,.16)}
+button:active{transform:translateY(1px) scale(.98)}
+.hero h1{animation:riseIn .75s var(--motion-ease) both}
+.hero>div:first-child{animation:float3d 4s ease-in-out infinite;filter:drop-shadow(0 12px 12px rgba(59,91,219,.15))}
+.view.on{animation:viewIn .38s var(--motion-ease) both}
+nav a{transition:transform .2s,background .2s}nav a:hover{transform:translateX(3px)}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px) rotateX(-8deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
+@keyframes viewIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float3d{0%,100%{transform:perspective(500px) rotateY(-5deg) translateY(0)}50%{transform:perspective(500px) rotateY(5deg) translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* CSS polish: responsive layout, consistent controls, accessible motion */
+:root {
+  color-scheme: light;
+  --ui-radius: 14px;
+  --ui-shadow: 0 10px 28px rgba(15, 23, 42, .08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg, canvas, video { max-width: 100%; }
+button, input, select, textarea { font: inherit; }
+button, .btn, input[type="button"], input[type="submit"] {
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+button:hover, .btn:hover, input[type="button"]:hover, input[type="submit"]:hover {
+  transform: translateY(-1px);
+}
+button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, a:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, .55);
+  outline-offset: 2px;
+}
+input, select, textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+.card, .panel, .modal, .paper-preview {
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow);
+}
+table { width: 100%; border-collapse: collapse; }
+.table-wrap, .table-responsive { max-width: 100%; overflow-x: auto; }
+@media (max-width: 900px) {
+  .container, .main-container, .app-container { width: min(100% - 28px, 100%); }
+  .sidebar { max-width: 100%; }
+  .main-layout, .dashboard-layout, .content-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 600px) {
+  body { font-size: 14px; }
+  .container, .main-container, .app-container { width: calc(100% - 20px); }
+  .header, header, .topbar { flex-wrap: wrap; gap: 10px; }
+  .actions, .button-group, .toolbar { flex-wrap: wrap; }
+  button, .btn { max-width: 100%; }
+  .modal, .dialog { width: calc(100% - 20px) !important; max-height: 90dvh; overflow: auto; }
+  .form-grid, .settings-grid, .generator-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .paper-preview { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+</style></head><body>
+<header><span style="font-size:24px">🎓</span><b>School Paper Generator</b><span class="sp"></span><span id="un"></span><button onclick="lgn()" id="lb">Login</button><button onclick="theme()" id="tb">🌙 Dark</button></header>
+<div class="layout"><nav id="nav"></nav><main>
+<section class="view" id="v-home"><div class="hero"><div style="font-size:70px">📝🎓📚</div><h1>School Paper Generator</h1><h2 style="color:var(--p)">Create Professional Examination Papers in Minutes</h2><p>An easy-to-use paper creation platform for teachers. Enter your subject, topic and marks, then create a professional examination paper ready for printing or PDF download.</p><div class="row" style="justify-content:center"><button class="p big" onclick="nw()">Create New Paper</button><button class="big" onclick="go('papers')">My Papers</button></div><div class="card" id="vq" style="max-width:640px;margin:30px auto 0;text-align:left"><h3 style="margin:0 0 4px">👋 Visitor? Create a Paper Instantly <span dir="rtl">— مہمان کے لیے فوری پیپر</span></h3><p style="margin:0 0 12px;color:var(--m);font-size:13px">No sign-up needed. Just enter a topic and click Create. / رجسٹریشن کی ضرورت نہیں، بس موضوع لکھیں۔</p><div class="grid"><div><label>Topic / موضوع *</label><input id="q_topic" placeholder="Human Heart"></div><div><label>Subject / مضمون</label><input id="q_subj" placeholder="Biology" list=sl></div><div><label>Class / جماعت</label><input id="q_cls" placeholder="9th" list=cl></div><div><label>School Name (optional)</label><input id="q_school"></div><div><label>Total Marks</label><select id="q_marks"><option>10</option><option>20</option><option>25</option><option selected>50</option><option>75</option></select></div><div><label>Paper Language / زبان</label><select id="q_lang"><option>English</option><option>اردو</option><option>پښتو</option></select></div></div><p style="margin:12px 0 0"><button class="p big" onclick="quick()">Create Paper as Visitor</button></p></div></div></section>
+<section class="view" id="v-dash"><h2>Dashboard</h2><div class="grid" id="stats"></div><p><button class="p big" onclick="nw()">+ Create New Paper</button></p></section>
+<section class="view" id="v-create"><h2>Create Paper</h2><datalist id=cl><option>Nursery<option>KG<option>1st<option>2nd<option>3rd<option>4th<option>5th<option>6th<option>7th<option>8th<option>9th<option>10th</datalist><datalist id=sl><option>Urdu<option>English<option>Mathematics<option>General Knowledge<option>Islamiyat<option>Science<option>Biology<option>Chemistry<option>Physics<option>Computer<option>Social Studies</datalist>
+<div class="card"><label>What paper do you want to create?</label><textarea id="pr" rows="2" placeholder="Example: Create a Class 9 Biology paper on Human Heart for 50 marks."></textarea><p class="row"><button class="p big" onclick="fromPrompt()">GENERATE PAPER</button></p></div>
+<div class="card"><div class="grid" id="form"></div></div>
+<div id="work" style="display:none"><div class="card row"><b>Version</b><span id="vers"></span><span class="sp"></span><button onclick="sv('draft')">Save Draft</button><button class="p" onclick="sv('done')">Save Paper</button><button onclick="window.print()">Print Paper</button><button class="p" onclick="pdf()">DOWNLOAD PDF</button></div>
+<div class="card"><label>Instructions (editable, one per line)</label><textarea id="ins" rows="4" oninput="cur.instr=this.value;rp()"></textarea></div>
+<div class="row"><select id="nt" style="width:auto"><option value="mcq">MCQ</option><option value="short">Short</option><option value="long">Long</option><option value="fill">Fill in the blank</option><option value="tf">True / False</option><option value="nur">Activity (Nursery)</option></select><button class="p" onclick="addq()">+ Add Question</button><b id="tot" style="margin-left:auto"></b></div><br>
+<div id="cards"></div><h3>A4 Preview</h3><div id="paper"></div></div></section>
+<section class="view" id="v-papers"><h2 id="pt">My Papers</h2><div class="row card"><input id="sq" placeholder="Search Papers..." oninput="lp()" style="flex:2"><select id="fc" onchange="lp()" style="flex:1"></select><select id="fs" onchange="lp()" style="flex:1"></select></div><div id="plist"></div></section>
+<section class="view" id="v-templates"><h2>Templates</h2><div class="grid" id="tpl"></div></section>
+<section class="view" id="v-settings"><h2>Settings</h2><div class="card"><div class="grid" id="sf"></div><p><button class="p" onclick="ss()">Save Settings</button></p></div></section>
+<section class="view" id="v-admin"><h2>Admin Dashboard</h2><div id="admc"></div></section>
+<section class="view" id="v-about"><div class="card" style="text-align:center;padding:40px"><div style="font-size:50px">🎓</div><h2>School Paper Generator</h2><p>Created &amp; Developed by</p><h1 style="margin:4px">Muhammad Mohsin Mushtaq</h1><b>Developer &amp; Creator</b><br><b>2026</b><p style="max-width:520px;margin:16px auto;color:var(--m)">A modern educational tool designed to help teachers create professional examination papers quickly and efficiently.</p></div></section>
+</main></div>
+<footer><b>School Paper Generator</b><br>Create • Edit • Save • Print • Download<br>Developed by Muhammad Mohsin Mushtaq<br>© 2026 Muhammad Mohsin Mushtaq — All Rights Reserved.</footer>
+<div id="lm" style="display:none;position:fixed;inset:0;background:rgba(15,20,40,.6);z-index:20;align-items:center;justify-content:center;padding:12px;overflow:auto"><div class="card" style="width:min(400px,100%);margin:auto;padding:26px"><div style="text-align:center"><div style="font-size:34px">🎓</div><b>SCHOOL PAPER GENERATOR</b><h2 id="am_t" style="margin:8px 0 14px">Welcome Back</h2></div>
+<button id="am_g" class="big" style="width:100%" onclick="google()">🔵 Continue with Google</button><div id="am_o" style="text-align:center;color:var(--m);margin:10px 0">OR</div>
+<div style="display:grid;gap:8px"><div id="l_nw" style="display:none"><label>Name</label><input id="l_n" autocomplete="name"></div><div><label>Email</label><input id="l_e" type="email" autocomplete="email"></div><div><label>Password</label><input id="l_p" type="password" autocomplete="current-password"></div><div id="l_cw" style="display:none"><label>Confirm Password</label><input id="l_c" type="password" autocomplete="new-password"></div><div id="phone_box" style="display:none"><label>Phone Number (with country code)</label><input id="l_phone" type="tel" placeholder="+923001234567"><div id="recaptcha-container"></div><button type="button" onclick="sendPhoneCode()">Send OTP</button><label style="margin-top:8px">Verification Code</label><input id="l_otp" inputmode="numeric" placeholder="6-digit OTP"><button type="button" onclick="verifyPhoneCode()">Verify Phone</button></div></div>
+<div class="row" style="gap:6px;margin-top:10px;flex-wrap:wrap"><button type="button" onclick="showPhone()">Phone OTP</button><button type="button" onclick="emailLink()">Email Magic Link</button></div>
+<p id="l_err" style="color:#d6336c;font-size:13px;min-height:18px;margin:8px 0"></p><button id="am_b" class="p big" style="width:100%" onclick="emailAuth()">Login</button>
+<p style="text-align:center;margin:10px 0 0"><a onclick="forgot()" style="cursor:pointer;color:var(--p)">Forgot Password?</a></p><p id="am_tg" style="text-align:center;margin:6px 0"></p>
+<p style="text-align:center;font-size:13px;margin:6px 0"><a onclick="openAuth('in',1)" style="cursor:pointer;color:var(--m)">Admin Login</a> · <a onclick="$('#lm').style.display='none'" style="cursor:pointer;color:var(--m)">Continue as Visitor</a></p></div></div>
+<script>
+/* ===== PASTE YOUR FIREBASE CONFIG HERE (Firebase Console → Project settings → Your apps → Web app) ===== */
+const FIREBASE_CONFIG={apiKey:"YOUR_API_KEY",authDomain:"YOUR_PROJECT_ID.firebaseapp.com",projectId:"YOUR_PROJECT_ID",storageBucket:"YOUR_PROJECT_ID.appspot.com",messagingSenderId:"YOUR_SENDER_ID",appId:"YOUR_APP_ID"};
+/* ========================================================================================================= */
+const $=s=>document.querySelector(s),L=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},S=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},R=a=>a[Math.random()*a.length|0],uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let user=null,role='user',cv='home',papers=L('spg_p'),st=L('spg_s')||{school:'The Iqra Islamic Educational System',teacher:'',cls:'9th',subj:'Biology',time:'1 Hour 30 Minutes',instr:"Read all questions carefully.\nAttempt all required questions.\nWrite answers clearly.\nDo not use unfair means."},cur=null;
+const HM=[["How many chambers does the human heart have?","Four","Two","Three","Five"],["Which vessel carries oxygenated blood from the heart to the body?","Aorta","Pulmonary vein","Vena cava","Pulmonary artery"],["Which chamber pumps blood to the whole body?","Left ventricle","Right atrium","Left atrium","Right ventricle"],["The valve between the left atrium and left ventricle is the:","Bicuspid valve","Tricuspid valve","Aortic valve","Semilunar valve"],["Normal resting heart rate of an adult is about:","72 beats per minute","40 beats per minute","120 beats per minute","150 beats per minute"],["Which vessels carry blood back to the heart?","Veins","Arteries","Capillaries","Lymph vessels"],["The muscle tissue of the heart is called:","Myocardium","Pericardium","Endocardium","Epicardium"],["Blood pressure is measured with a:","Sphygmomanometer","Thermometer","Barometer","Hygrometer"],["Which chamber receives deoxygenated blood from the body?","Right atrium","Left atrium","Left ventricle","Right ventricle"],["The double-layered sac around the heart is the:","Pericardium","Myocardium","Septum","Aorta"],["Which blood cells carry oxygen?","Red blood cells","White blood cells","Platelets","Plasma"],["The wall separating left and right sides of the heart is the:","Septum","Valve","Aorta","Atrium"],["Which vessel carries blood from the heart to the lungs?","Pulmonary artery","Pulmonary vein","Aorta","Vena cava"],["The first heart sound 'lub' is caused by closure of:","Atrioventricular valves","Semilunar valves","Aorta","Septum"],["Blockage of coronary arteries can cause:","Heart attack","Anemia","Asthma","Diabetes"]];
+const GM=t=>[[`Which statement about ${t} is correct?`,"It has a definite structure and function","It has no function","It cannot be studied","It is unrelated to science"],[`${t} is studied mainly to understand:`,"its structure and role","only its colour","nothing useful","its market price"],[`Which of the following is most closely related to ${t}?`,"Its key concepts and terms","Random unrelated facts","Only historical dates","None of these"]];
+const HS=["What is the function of the valves in the heart?","Differentiate between arteries and veins.","Name the four chambers of the heart.","What is a pulse? How is it measured?","Why is the left ventricle wall thicker than the right?","Define blood pressure.","What is the role of the septum?","State two functions of blood.","Name any two heart diseases."];
+const GS=["Define {t}.","State any two points of importance of {t}.","Write a short note on {t}.","List the main parts or features of {t}.","Why is {t} important in daily life?","Differentiate between any two key terms of {t}.","Give two examples related to {t}."];
+const HL=["Describe the structure of the human heart with a labelled diagram.","Explain double circulation of blood in the human body.","Describe the cardiac cycle in detail.","Discuss common heart diseases and their prevention.","Explain how blood flows through the heart and lungs."];
+const GL=["Explain {t} in detail.","Describe the main concepts of {t} with examples.","Discuss the importance and applications of {t}.","Write a detailed note on {t} with a diagram where needed."];
+const FB=["The basic unit of life is the ______.","{t} is an important topic of ______.","The study of {t} helps us understand ______."],TF=["{t} is an important part of this subject. (True / False)","All concepts of {t} are unrelated. (True / False)"];
+function mk(type,t,d,marks,ex){if(type=='nur')return mkN(marks,ex);let h=/heart/i.test(t),ur=cur&&cur.lang=='اردو',q,n=0;do{q={id:uid(),type,marks};
+ if(type=='mcq'){let a=ur?R(UG(t).concat(h?UH:[])):R(GM(t).concat(h?HM:[])),o=a.slice(1),c=o[0];o.sort(()=>Math.random()-.5);q.text=a[0];q.opts=o;q.ans=o.indexOf(c)}
+ else{let p=ur?(UB[type]||[]).concat((h&&UBH[type])||[]):type=='short'?(h?HS:[]).concat(GS):type=='long'?(h?HL:[]).concat(GL):type=='fill'?FB:TF;q.text=R(p).replace(/\{t\}/g,t);if(type=='long'&&(d=='hard'||d=='mixed'&&Math.random()<.4))q.text+=ur?' وجوہات اور مثالیں دیجیے۔':' Give reasons and examples.';if(type=='short'&&d=='easy')q.text+=ur?' (2-3 سطریں)':' (2-3 lines)'}
+if(h&&type=='long'&&/diagram|خاکے/.test(q.text))q.dg='heart'
+}while(ex&&ex.some(x=>x.text==q.text)&&++n<12);return q}
+const lvl=c=>{c=(c||'').toLowerCase();if(/nur|play|نرسری/.test(c))return 0;if(/prep|kg|k\.g|پریپ/.test(c))return .5;let n=parseInt(c.replace(/\D/g,''));return isNaN(n)?9:Math.min(Math.max(n,1),10)};
+const sbj=x=>/urdu|اردو/i.test(x)?'ur':/english|انگ/i.test(x)?'en':/math|حساب|ریاضی/i.test(x)?'ma':/islam|دینیات|اسلامیات|quran/i.test(x)?'is':/\bgk\b|general|knowledge|معلومات/i.test(x)?'gk':/sci|bio|chem|phys|comput|سائنس/i.test(x)?'sc':'gn';
+const isN=c=>lvl(c)<2;
+const R2=n=>Math.random()*n|0,shf=a=>a.slice().sort(()=>Math.random()-.5),AZ='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),NU=[1,2,3,4,5,6,7,8,9,10],NM=['One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'],UN=['ایک','دو','تین','چار','پانچ','چھ','سات','آٹھ','نو','دس'];
+const EB=[['🍎','Apple','سیب','fruit'],['🍌','Banana','کیلا','fruit'],['🍊','Orange','مالٹا','fruit'],['🍇','Grapes','انگور','fruit'],['🐱','Cat','بلی','animal'],['🐶','Dog','کتا','animal'],['🐟','Fish','مچھلی','animal'],['🐄','Cow','گائے','animal'],['🐓','Hen','مرغی','animal'],['🌞','Sun','سورج','nature'],['⭐','Star','ستارہ','nature'],['🌸','Flower','پھول','nature'],['🚗','Car','گاڑی','vehicle'],['✈️','Plane','جہاز','vehicle'],['👁️','Eye','آنکھ','body'],['👂','Ear','کان','body'],['👃','Nose','ناک','body'],['✋','Hand','ہاتھ','body']],CB=[['🔴','Red','سرخ'],['🟢','Green','سبز'],['🔵','Blue','نیلا'],['🟡','Yellow','پیلا']];
+const GKB=[["How many days are there in a week?","7","5","6","8"],["Which animal gives us milk?","Cow","Lion","Fish","Snake"],["What is the colour of the sky?","Blue","Red","Green","Black"],["We see with our:","Eyes","Ears","Nose","Hands"],["Which fruit is yellow?","Banana","Apple","Grapes","Cherry"],["The Sun rises in the:","East","West","North","South"],["Plants need ___ to grow.","Water and sunlight","Only sand","Plastic","Stones"],["Which is a living thing?","Tree","Stone","Chair","Table"],["Which gas do we breathe in?","Oxygen","Smoke","Dust","Steam"],["The capital of Pakistan is:","Islamabad","Lahore","Karachi","Peshawar"]];
+const ISB=[["How many pillars of Islam are there?","5","4","6","3"],["The last Prophet of Allah is:","Hazrat Muhammad (PBUH)","Hazrat Musa (AS)","Hazrat Isa (AS)","Hazrat Ibrahim (AS)"],["How many daily prayers (Salah) are there?","5","3","4","6"],["Muslims fast in the month of:","Ramadan","Muharram","Rajab","Shaban"],["The Holy Book of Muslims is:","Quran","Torah","Bible","Zabur"],["Hajj is performed in:","Makkah","Madinah","Lahore","Jerusalem"]];
+const ENB=[["She ___ to school every day.","goes","go","going","gone"],["Choose the correct article: ___ apple","an","a","the","no article"],["The plural of 'child' is:","children","childs","childes","childrens"],["The opposite of 'big' is:","small","tall","long","wide"],["The past tense of 'eat' is:","ate","eaten","eating","eats"],["Which word is a noun?","Book","Run","Quickly","Beautiful"],["He ___ playing football now.","is","are","am","were"],["A synonym of 'happy' is:","glad","sad","angry","tired"]],ENB2=[["If I ___ you, I would study harder.","were","am","was being","be"],["Passive voice of 'She wrote a letter.' is:","A letter was written by her.","A letter is written by her.","A letter wrote her.","A letter has written."],["A word that describes a verb is a/an:","adverb","noun","adjective","pronoun"],["He has been waiting ___ morning.","since","for","from","by"]];
+const UM=[["'بڑا' کا الٹ کیا ہے؟","چھوٹا","لمبا","موٹا","اچھا"],["'دن' کا الٹ کیا ہے؟","رات","صبح","شام","دوپہر"],["'علم' کی جمع ہے؟","علوم","علمات","علمیں","علمے"],["پاکستان کا قومی شاعر کون ہے؟","علامہ اقبال","میر تقی میر","غالب","فیض"],["بانی پاکستان کون ہیں؟","قائداعظم محمد علی جناح","لیاقت علی خان","علامہ اقبال","سرسید"]];
+const UF=['میں روز ______ جاتا ہوں۔ (اسکول / باغ)','سورج ______ سے نکلتا ہے۔ (مشرق / مغرب)','پاکستان کا دارالحکومت ______ ہے۔','ہم ______ پڑھتے ہیں۔ (کتاب / روٹی)','پاکستان کا قومی کھیل ______ ہے۔'],EF=['I ___ a student. (am / is / are)','She ___ a cat. (has / have)','They ___ playing. (is / are)','He ___ to school. (go / goes)'];
+const AN=[['hot','cold'],['big','small'],['up','down'],['happy','sad'],['day','night'],['tall','short']],UA=[['بڑا','چھوٹا'],['دن','رات'],['اچھا','برا'],['گرم','ٹھنڈا'],['اوپر','نیچے']],TFB=['The sun rises in the east.','A cat has four legs.','Fish live on land.','There are 8 days in a week.','The sky is green.','Plants need sunlight to grow.'];
+const CP=[["Ali is a student of class four. He wakes up early in the morning and offers prayer. He goes to school with his friend Ahmed. Ali loves reading books. He wants to become a doctor.","1. Who is Ali? 2. What does he do early in the morning? 3. What does Ali want to become?"],["Pakistan is our beautiful homeland. Its capital is Islamabad. It has four provinces. We should love and serve our country.","1. What is the capital of Pakistan? 2. How many provinces does Pakistan have? 3. What should we do for our country?"]],UCP=[["ہمارا پیارا وطن پاکستان ہے۔ اس کا دارالحکومت اسلام آباد ہے۔ پاکستان میں چار صوبے ہیں۔ ہم سب اپنے وطن سے محبت کرتے ہیں۔","1۔ پاکستان کا دارالحکومت کیا ہے؟ 2۔ پاکستان میں کتنے صوبے ہیں؟ 3۔ ہم کس سے محبت کرتے ہیں؟"]];
+function mathQ(l){let a=2+R2(30),b=2+R2(20),x=2+R2(9);
+ if(l<3)return R([[`Add: ${a} + ${b} = ____`,a+b],[`Subtract: ${a+b} − ${b} = ____`,a],[`${a} + ${x} = ____`,a+x]]);
+ if(l<=5)return R([[`Multiply: ${a} × ${x} = ____`,a*x],[`Divide: ${a*x} ÷ ${x} = ____`,a],[`Find the perimeter of a rectangle with length ${a} cm and width ${b} cm.`,2*(a+b)],[`${a} + ${b} × ${x} = ____`,a+b*x]]);
+ if(l<=8)return R([[`Solve: ${x}x + ${b} = ${x*a+b}. Find x.`,a],[`Find the area of a rectangle with length ${a} cm and width ${b} cm.`,a*b],[`What is ${x*5}% of ${a*20}?`,x*a]]);
+ return R([[`Solve: ${x}x − ${b} = ${x*a-b}. Find x.`,a],[`The sides of a right triangle are ${3*x} cm and ${4*x} cm. Find the hypotenuse (cm).`,5*x],[`Find the discriminant of x² + ${b}x + ${a} = 0.`,b*b-4*a]])}
+const T=(c,e,u)=>c.ur?u:e,nm=(x,c)=>c.ur?x[2]:x[1];
+const G={
+tr:c=>{let a=c.sub=='ma'?NU:c.sub=='ur'?UL:AZ,s=R2(a.length-5);return{type:'nur',text:c.sub=='ma'?T(c,'Trace the numbers.','نمبروں پر لکیر پھیریں۔'):T(c,'Trace and write the letters.','حروف پر لکیر پھیر کر لکھیں۔'),dg:'trc:'+a.slice(s,s+5).join(' ')}},
+tx:c=>{let a=c.sub=='ma'?NU:c.sub=='ur'?UL:AZ,s=R2(a.length-5);return{type:'nur',text:T(c,c.sub=='ma'?'Write the missing numbers.':'Fill in the missing letters.','خالی جگہ پُر کریں۔'),dg:'txt:'+a.slice(s,s+5).map((x,i)=>i%2?'_':x).join(' ')}},
+ci:c=>{if(!['ur','en','ma'].includes(c.sub)){let k=R(['fruit','animal']),a=shf(EB.filter(e=>e[3]==k))[0],o=shf([a,...shf(EB.filter(e=>e[3]!=k)).slice(0,2)]);return{type:'nur',text:T(c,`Circle the ${k}.`,`${k=='fruit'?'پھل':'جانور'} پر دائرہ لگائیں۔`),dg:'cir:'+o.map(e=>e[0]).join(' ')}}
+ let a=c.sub=='ma'?NU:c.sub=='ur'?UL:AZ,x=R(a);return{type:'nur',text:c.sub=='ma'?T(c,`Circle the number ${x}.`,`نمبر ${x} پر دائرہ لگائیں۔`):T(c,`Circle the letter ${x}.`,`حرف «${x}» پر دائرہ لگائیں۔`),dg:'cir:'+shf([x,x,R(a),R(a),R(a)]).join(' ')}},
+pc:c=>{let x=R(EB);return{type:'nur',text:c.sub=='ur'?'تصویر دیکھ کر پہلا حرف لکھیں۔ ______':c.sub=='en'?'Look at the picture and write the first letter. ______':T(c,'Name the picture. ______','تصویر کا نام لکھیں۔ ______'),dg:'pic:'+x[0]}},
+mt:c=>{if(c.sub=='ma'){let a=shf(NU).slice(0,3),nn=c.ur?UN:NM;return{type:'nur',text:T(c,'Match the numbers with their names.','نمبروں کو ان کے ناموں سے ملائیں۔'),dg:'mat2:'+a.map(n=>n+'-'+nn[n-1]).join('|')}}let it=shf(EB).slice(0,3);return{type:'nur',text:T(c,'Match the pictures with the words.','تصویروں کو ان کے ناموں سے ملائیں۔'),dg:'mat:'+it.map(x=>x[0]+' '+nm(x,c)).join('|')}},
+ca:c=>({type:'nur',text:'Match capital letters with small letters.',dg:'mat2:'+shf(AZ).slice(0,3).map(x=>x+'-'+x.toLowerCase()).join('|')}),
+wr:c=>{let a=shf(EB);return{type:'nur',text:`${a[0][2][0]} سے ______      ${a[1][2][0]} سے ______      ${a[2][2][0]} سے ______`,dg:''}},
+wd:c=>{let x=R(EB);return{type:'nur',text:c.sub=='ur'?'خالی جگہ پُر کریں: ___'+x[2].slice(1):'Complete the word: '+x[1][0]+'_'+x[1].slice(2),dg:'pic:'+x[0]}},
+cn:c=>({type:'nur',text:T(c,'Count the pictures and write the number. ______','گنتی گنیں اور نمبر لکھیں۔ ______'),dg:'cnt:'+R(EB)[0]+':'+(2+R2(c.l<.5?5:8))}),
+ba:c=>{let n=2+R2(8);return{type:'nur',text:T(c,`Write the number before and after ${n}. ____  ____`,`${n} سے پہلے اور بعد کا نمبر لکھیں۔ ____  ____`),dg:''}},
+ad:c=>{let a=1+R2(4),b=1+R2(4);return c.l<.5?{type:'nur',text:T(c,'Add the pictures.','تصویروں کو جمع کریں۔'),dg:'add:'+R(EB)[0]+':'+a+':'+b}:{type:'nur',text:T(c,'Add: ','جمع کریں: ')+(a+2)+' + '+(b+2)+' = ____',dg:''}},
+sh:c=>({type:'nur',text:T(c,'Colour the shape.','شکل میں رنگ بھریں۔'),dg:'shp:'+R(['circle','square','triangle'])}),
+cl:c=>({type:'nur',text:T(c,'Name the colour. ______','رنگ کا نام لکھیں۔ ______'),dg:'pic:'+R(CB)[0]}),
+tf:c=>c.ur?G.mq(c):{type:'tf',text:R(TFB)+' (True / False)'},
+mq:c=>{let b=c.sub=='ur'?UM:c.sub=='en'?ENB.concat(c.l>5?ENB2:[]):c.sub=='is'?ISB:GKB,a=R(b),o=a.slice(1),k=o[0];o=shf(o);return{type:'mcq',text:a[0],opts:o,ans:o.indexOf(k)}},
+mn:c=>{let[t,a]=mathQ(c.l),o=shf([...new Set([a,a+1,a+2,Math.abs(a-1),a+3])].slice(0,4));return{type:'mcq',text:t.replace(/\s*=?\s*_+/,' = ?'),opts:o.map(String),ans:o.indexOf(a)}},
+ar:c=>({type:'short',text:mathQ(c.l)[0]}),
+sa:c=>({type:'fill',text:c.sub=='ur'?R(UF):c.sub=='en'?R(EF):R(FB).replace(/\{t\}/g,c.t)}),
+an:c=>{let a=R(c.sub=='ur'?UA:AN);return{type:'short',text:c.sub=='ur'?`'${a[0]}' کا متضاد لکھیں۔ ______`:`Write the opposite of '${a[0]}'. ______`}},
+sq:c=>{let t=c.t,w=R(['book','school','friend','mother','garden']),p;
+ if(c.sub=='en')p=c.l<6?[`Make a sentence using the word '${w}'.`,`Write the plural of '${R(['child','man','leaf','box'])}'. ______`]:["Change into passive voice: 'She wrote a letter.'","Write the past tense of 'go'. ______","Correct the sentence: 'He go to school every day.'",`Write a paragraph of five lines on ${t}.`];
+ else if(c.sub=='ur')p=c.l<6?[`'${R(['کتاب','سورج','پاکستان','استاد','باغ'])}' سے جملہ بنائیں۔`]:UB.short.map(x=>x.replace('{t}',t));
+ else p=(c.ur?UB.short:GS).map(x=>x.replace(/\{t\}/g,t));return{type:'short',text:R(p)}},
+lq:c=>{let t=c.t,p;if(c.sub=='en')p=c.l<3?[`Write 3 sentences about ${t}.`]:c.l<6?[`Write 5 sentences about ${t}.`,`Write a short paragraph on ${t}.`]:[`Write an essay on ${t}.`,'Write an application to your principal for sick leave.',`Write a letter to your friend about ${t}.`];
+ else if(c.sub=='ur')p=c.l<6?[`${t} پر پانچ جملے لکھیں۔`]:UB.long.map(x=>x.replace('{t}',t)).concat(['اپنے ہیڈ ماسٹر کو چھٹی کی درخواست لکھیں۔','اپنے دوست کے نام خط لکھیں۔']);
+ else p=(c.ur?UB.long:GL).map(x=>x.replace(/\{t\}/g,t));return{type:'long',text:R(p)}},
+cmp:c=>{let p=R(c.sub=='ur'?UCP:CP);return{type:'long',text:T(c,'Read the passage and answer the questions.','عبارت پڑھ کر سوالات کے جواب لکھیں۔')+'\n'+p[0]+'\n'+p[1]}}};
+const BP={'ur.n':[['tr',5],['mt',5],['ci',5],['tx',5],['pc',5],['wr',5]],'en.n':[['tr',5],['ci',5],['mt',5],['ca',5],['pc',5],['tx',5]],'ma.n':[['tr',5],['cn',5],['tx',5],['mt',5],['ad',5],['ba',5],['sh',5]],'gk.n':[['cl',5],['mt',5],['pc',5],['ci',5],['cn',5]],
+'ur.k':[['tr',4],['wd',4],['mt',4],['tx',4],['ci',4],['pc',4],['wr',4]],'en.k':[['tr',4],['wd',4],['mt',4],['ca',4],['tx',4],['pc',4],['ci',4]],'ma.k':[['tr',4],['tx',4],['cn',4],['ad',4],['mt',4],['ba',4],['sh',4]],'gk.k':[['cl',4],['mt',4],['pc',4],['ci',4],['tf',2],['mq',2]],
+'ur.p':[['mq',1],['sa',2],['sq',2],['an',2],['cmp',5],['lq',5]],'en.p':[['mq',1],['sa',1],['an',2],['sq',2],['cmp',5],['lq',5]],'ma.p':[['mn',1],['ar',2],['mn',1],['ar',3],['ar',2]],'gk.p':[['mq',1],['tf',1],['sq',2],['mq',1],['sq',2],['lq',5]],
+'ur.m':[['mq',1],['sq',2],['cmp',5],['lq',5],['sq',2]],'en.m':[['mq',1],['sq',2],['cmp',5],['lq',5],['sq',2]],'ma.m':[['mn',1],['ar',3],['mn',1],['ar',5],['ar',3]]};
+function ctx(){return{t:cur.topic,sub:sbj(cur.subj),l:lvl(cur.cls),ur:cur.lang=='اردو',d:cur.diff}}
+function mkG(g,k,ex){let q,n=0;do{q=Object.assign({id:uid(),marks:k,g},G[g](ctx()))}while(ex&&ex.some(x=>x.text==q.text&&x.dg==q.dg)&&++n<12);return q}
+function build(m,t,d){let c=ctx(),b=c.l<1?'n':c.l<2?'k':c.l<6?'p':'m';
+ if(b=='m'&&!['ur','en','ma'].includes(c.sub))return oldBuild(m,t,d);
+ let P=BP[c.sub+'.'+b]||BP['gk.'+b],qs=[],s=0,i=0;
+ while(s<m){let[g,k]=P[i++%P.length];k=Math.min(k,m-s);let q=mkG(g,k,qs);if(qs.some(x=>x.text==q.text&&x.dg==q.dg))q=mkG(P[0][0],k,qs);qs.push(q);s+=k}return qs}
+const FR=[['🍎','Apple'],['🐱','Cat'],['🐶','Dog'],['🐟','Fish'],['🌞','Sun'],['⭐','Star'],['🚗','Car'],['🌸','Flower']],UL='ا ب پ ت ٹ ث ج چ ح خ د ڈ ذ ر ز س ش'.split(' ');
+const DO=[['','None'],['heart','Heart (label A–D)'],['shp:circle','Circle'],['shp:square','Square'],['shp:triangle','Triangle'],['cnt:🍎:5','Count apples'],['trc:A B C D E','Trace A–E'],['trc:1 2 3 4 5','Trace 1–5'],['txt:A _ C _ E','Missing letters'],['mat:🍎 Apple|🐱 Cat|🐶 Dog','Match pictures']];
+const HRT='<svg width="150" height="140" viewBox="0 0 100 95" style="display:block;margin:6px 0"><path d="M50 90C10 60 0 35 15 15 28 2 45 8 50 22 55 8 72 2 85 15 100 35 90 60 50 90Z" fill="none" stroke="#000" stroke-width="1.5"/><path d="M50 22V85M22 52H78" stroke="#000"/><text x="30" y="40" font-size="9">A</text><text x="66" y="40" font-size="9">B</text><text x="30" y="70" font-size="9">C</text><text x="66" y="70" font-size="9">D</text></svg>';
+const SH={circle:'<circle cx="40" cy="40" r="35"/>',square:'<rect x="5" y="5" width="70" height="70"/>',triangle:'<polygon points="40,5 75,75 5,75"/>'};
+function dg(d){if(!d)return'';let[k,a,b,e]=d.split(':');
+ if(k=='heart')return HRT;
+ if(k=='shp')return `<svg width="90" height="90" viewBox="0 0 80 80" style="display:block;margin:6px 0" fill="none" stroke="#000" stroke-width="2">${SH[a]||''}</svg>`;
+ if(k=='cnt')return `<div style="font-size:26px;letter-spacing:4px">${(a+' ').repeat(+b||1)}</div>`;
+ if(k=='trc'||k=='txt')return `<div class=tr${k=='txt'?' style="color:#000"':''}>${esc(a)}</div>`;
+ if(k=='pic')return `<div style="font-size:46px;margin:4px 0">${a}</div>`;
+ if(k=='cir')return `<div style="font-size:30px;letter-spacing:14px;margin:4px 0">${esc(a)}</div>`;
+ if(k=='add')return `<div style="font-size:26px">${a.repeat(+b)} + ${a.repeat(+e)} = ____</div>`;
+ if(k=='mat2'){let it=a.split('|').map(x=>x.split('-')),w=it.map(x=>x[1]);w.push(w.shift());return `<div style="display:flex;gap:80px;font-size:24px;margin:6px 0"><div>${it.map(x=>x[0]).join('<br>')}</div><div>${w.join('<br>')}</div></div>`}
+ if(k=='mat'){let it=a.split('|').map(x=>x.split(' ')),w=it.map(x=>x[1]);w.push(w.shift());return `<div style="display:flex;gap:80px;font-size:22px;margin:6px 0"><div>${it.map(x=>x[0]).join('<br>')}</div><div>${w.join('<br>')}</div></div>`}
+ return''}
+function mkN(marks,ex){let ur=cur.lang=='اردو',m=/math|count|number|حساب/i.test(cur.subj),u=/urdu|اردو/i.test(cur.subj)||ur,n=0,q;
+ do{let k=R(m?['cnt','trn','shp']:u?['trc','cnt','shp']:['trc','mis','mat','cnt','shp']),f=R(FR),c=2+(Math.random()*7|0),s=Math.random()*20|0,t,d;
+ if(k=='cnt'){t=ur?'گنتی گنیں اور نمبر لکھیں۔ ______':'Count the pictures and write the number. ______';d='cnt:'+f[0]+':'+c}
+ else if(k=='trn'){t=ur?'نمبروں پر لکیر پھیریں۔':'Trace the numbers.';d='trc:'+[1,2,3,4,5].map(x=>x+s%5).join(' ')}
+ else if(k=='trc'){t=ur?'حروف پر لکیر پھیر کر لکھیں۔':'Trace and write the letters.';d='trc:'+(u?UL:'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).slice(s%12,s%12+5).join(' ')}
+ else if(k=='mis'){t='Fill in the missing letters.';d='txt:'+[0,1,2,3,4].map(i=>i%2?'_':String.fromCharCode(65+s%20+i)).join(' ')}
+ else if(k=='mat'){t='Match the pictures with the words.';d='mat:'+FR.slice().sort(()=>Math.random()-.5).slice(0,3).map(x=>x.join(' ')).join('|')}
+ else{t=ur?'شکل میں رنگ بھریں۔':'Colour the shape.';d='shp:'+R(['circle','square','triangle'])}
+ q={id:uid(),type:'nur',marks,text:t,dg:d}}while(ex&&ex.some(x=>x.text==q.text&&x.dg==q.dg)&&++n<12);return q}
+function oldBuild(m,t,d){let l=Math.floor(m*.5/5)*5,s=Math.floor(m*.2/2)*2,a=m-l-s,qs=[];
+ for(let i=0;i<a;i++)qs.push(mk('mcq',t,d,1,qs));for(let i=0;i<s/2;i++)qs.push(mk('short',t,d,2,qs));for(let i=0;i<l/5;i++)qs.push(mk('long',t,d,5,qs));return qs}
+const SECS=[['A','Multiple Choice Questions',['mcq']],['B','Short Questions',['short']],['C','Long Questions',['long']],['D','Additional Questions',['fill','tf']],['E','Activities',['nur']]];
+const UG=t=>[[`${t} کے بارے میں درست بیان کون سا ہے؟`,"اس کی ایک خاص ساخت اور کام ہے","اس کا کوئی کام نہیں","اس کا مطالعہ ممکن نہیں","اس کا سائنس سے تعلق نہیں"],[`${t} کا مطالعہ بنیادی طور پر کس لیے کیا جاتا ہے؟`,"اس کی ساخت اور کردار سمجھنے کے لیے","صرف رنگ جاننے کے لیے","کسی کام کا نہیں","قیمت جاننے کے لیے"]];
+const UH=[["انسانی دل کے کتنے خانے ہوتے ہیں؟","چار","دو","تین","پانچ"],["جسم کو آکسیجن والا خون کون سی نالی پہنچاتی ہے؟","ابہر (Aorta)","پلمونری وین","وینا کیوا","پلمونری آرٹری"],["پورے جسم کو خون پمپ کرنے والا خانہ کون سا ہے؟","بایاں بطین","دایاں اذین","بایاں اذین","دایاں بطین"],["بالغ انسان کے دل کی عام دھڑکن تقریباً کتنی ہوتی ہے؟","72 فی منٹ","40 فی منٹ","120 فی منٹ","150 فی منٹ"],["خون کو واپس دل تک کون سی نالیاں لاتی ہیں؟","وریدیں","شریانیں","شعریات","لمفی نالیاں"],["دل کے پٹھوں کو کیا کہتے ہیں؟","مایوکارڈیم","پیری کارڈیم","اینڈو کارڈیم","سپٹم"],["بلڈ پریشر ناپنے کا آلہ کون سا ہے؟","سفگمومینومیٹر","تھرمامیٹر","بیرومیٹر","ہائیگرومیٹر"]];
+const UB={short:["{t} کی تعریف کیجیے۔","{t} کی کوئی دو اہمیتیں لکھیے۔","{t} پر مختصر نوٹ لکھیے۔","{t} کے اہم حصے یا خصوصیات لکھیے۔","{t} روزمرہ زندگی میں کیوں اہم ہے؟"],long:["{t} کی تفصیل سے وضاحت کیجیے۔","{t} کے بنیادی تصورات مثالوں کے ساتھ بیان کیجیے۔","{t} کی اہمیت اور استعمالات پر بحث کیجیے۔"],fill:["{t} ایک اہم ______ ہے۔"],tf:["{t} اس مضمون کا اہم حصہ ہے۔ (درست / غلط)"]};
+const UBH={short:["دل کے والوز کا کام کیا ہے؟","شریان اور ورید میں فرق کیجیے۔","دل کے چاروں خانوں کے نام لکھیے۔","نبض کیا ہے؟","بائیں بطین کی دیوار موٹی کیوں ہوتی ہے؟","بلڈ پریشر کی تعریف کیجیے۔"],long:["انسانی دل کی ساخت کی وضاحت نامزد خاکے کے ساتھ کیجیے۔","دوہری گردش خون کی تفصیل بیان کیجیے۔","دل کی دھڑکن کے چکر (کارڈیک سائیکل) کی وضاحت کیجیے۔","دل کے عام امراض اور ان سے بچاؤ بیان کیجیے۔"]};
+const UI="تمام سوالات غور سے پڑھیں۔\nمطلوبہ تمام سوالات حل کریں۔\nجوابات واضح لکھیں۔\nغیر منصفانہ ذرائع استعمال نہ کریں۔";
+const UT=[['Class: ','جماعت: '],['Subject: ','مضمون: '],['Time: ','وقت: '],['Total Marks: ','کل نمبر: '],['Date: ','تاریخ: '],['Topic: ','موضوع: '],['Student Name: ','نام طالب علم: '],['Roll No: ','رول نمبر: '],['<b>Instructions</b>','<b>ہدایات</b>'],['Section ','حصہ '],['Multiple Choice Questions','معروضی سوالات (MCQs)'],['Short Questions','مختصر سوالات'],['Long Questions','تفصیلی سوالات'],['Additional Questions','اضافی سوالات'],['Activities','سرگرمیاں'],[' Marks</span>',' نمبر</span>'],['(Version ','(ورژن '],['End of Paper','پرچہ ختم شد']];
+const ut=h=>UT.reduce((a,[x,y])=>a.split(x).join(y),h).replace(/Q(\d+)\./g,'سوال $1.');
+const F=[['school','School Name','text'],['logo','School Logo','file'],['addr','School Address','text'],['year','Academic Year','text'],['exam','Exam Title','text'],['cls','Class','text'],['subj','Subject','text'],['topic','Chapter / Topic','text'],['teacher','Teacher Name','text'],['date','Exam Date','date'],['time','Time Allowed','text'],['marks','Total Marks','number'],['diff','Difficulty','sel'],['lang','Paper Language','sel2']];
+function buildForm(){$('#form').innerHTML=F.map(([k,n,t])=>`<div><label>${n}</label>`+(t=='sel'?`<select id="f_${k}">${['easy','medium','hard','mixed'].map(x=>`<option value=${x}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select>`:t=='sel2'?`<select id="f_${k}"><option>English</option><option>اردو</option><option>پښتو</option></select>`:t=='file'?`<input type=file accept="image/*" onchange="logo(this)">`:`<input id="f_${k}" type=${t}${k=='cls'?' list=cl':k=='subj'?' list=sl':''}>`)+'</div>').join('')}
+function fv(k,v){const e=$('#f_'+k);if(e)e.value=v==null?'':v}
+function logo(i){let f=i.files[0];if(!f)return;let r=new FileReader;r.onload=()=>{lg=r.result;if(cur){cur.logo=lg;rp()}};r.readAsDataURL(f)}let lg='';
+function fill(p){F.forEach(([k])=>fv(k,p[k]))}
+function nw(p){go('create',1);fill(Object.assign({school:st.school,logo:'',cls:st.cls,subj:st.subj,teacher:st.teacher,time:st.time,exam:'Class Test',marks:50,diff:'mixed',lang:'English',year:'2026',date:new Date().toISOString().slice(0,10)},p||{}));$('#work').style.display='none';cur=null;lg=st.logo||''}
+function fromPrompt(){let s=$('#pr').value,m;if(s){if(m=s.match(/class\s*(\d+)/i)||s.match(/(\d+)(?:th|st|nd|rd)/i))fv('cls',m[1]+'th');if(m=s.match(/(\d+)\s*marks?/i))fv('marks',m[1]);if(m=s.match(/(biology|chemistry|physics|math\w*|english|urdu|science|computer|history|geography|islamiyat|pashto)/i))fv('subj',m[1][0].toUpperCase()+m[1].slice(1).toLowerCase());if(m=s.match(/\bon\s+(.+?)(?:\s+for\b|\s+of\b|\.|$)/i))fv('topic',m[1].trim().replace(/\b\w/g,c=>c.toUpperCase()))}generate()}
+function generate(){let g=k=>$('#f_'+k).value,t=g('topic').trim();if(!t){alert('Please enter a topic.');return}let m=Math.max(1,+g('marks')||50);
+ cur={id:uid(),logo:lg,created:Date.now(),ver:'A',status:'draft',instr:st.instr};F.forEach(([k])=>{if(k!='logo')cur[k]=g(k)});let sb=sbj(cur.subj);if(sb=='ur')cur.lang='اردو';else if(sb=='en')cur.lang='English';if(cur.lang=='اردو'&&/^Read all/.test(cur.instr))cur.instr=UI;if(isN(cur.cls)&&(cur.instr==st.instr||cur.instr==UI))cur.instr=cur.lang=='اردو'?"استاد کی بات غور سے سنیں۔\nتمام سرگرمیاں صاف ستھرے انداز میں کریں۔\nپنسل اور رنگ استعمال کریں۔":"Listen carefully to the teacher.\nDo all activities neatly.\nUse a pencil and colours.";cur.marks=m;cur.topic=t;cur.qs=build(m,t,cur.diff);cur.vers={A:cur.qs};show()}
+function show(){go('create',1);$('#work').style.display='block';$('#ins').value=cur.instr;re();$('#work').scrollIntoView({behavior:'smooth'})}
+function tot(){return cur.qs.reduce((a,x)=>a+(+x.marks||0),0)}
+function re(){$('#cards').innerHTML=cur.qs.map((q,i)=>`<div class=card><div class=row><b>${i+1}. ${q.type.toUpperCase()}</b><label style="margin:0 0 0 8px">Marks</label><input type=number min=0 value=${q.marks} style="width:70px" oninput="u(${i},'marks',this.value)"><span class=sp></span><button onclick="mv(${i},-1)" title="Move up">↑</button><button onclick="mv(${i},1)" title="Move down">↓</button><button onclick="dup(${i})">Duplicate</button><button onclick="rg(${i})">Regenerate</button><button class=d onclick="del(${i})">Delete</button></div><textarea dir=auto rows=2 oninput="u(${i},'text',this.value)">${esc(q.text)}</textarea><div class=row style="margin-top:5px"><label style="margin:0">Diagram</label><select style="width:auto" onchange="u(${i},'dg',this.value)">${DO.map(([v,n])=>`<option value="${esc(v)}" ${q.dg==v?'selected':''}>${n}</option>`).join('')}</select></div>${q.opts?q.opts.map((o,j)=>`<div class=row style="margin-top:5px"><b>${'ABCD'[j]}.</b><input dir=auto style="flex:1" value="${esc(o)}" oninput="uo(${i},${j},this.value)">${q.ans==j?'✔':''}</div>`).join(''):''}</div>`).join('');rp()}
+const u=(i,k,v)=>{cur.qs[i][k]=v;rp()},uo=(i,j,v)=>{cur.qs[i].opts[j]=v;rp()};
+function mv(i,d){let j=i+d;if(j<0||j>=cur.qs.length)return;[cur.qs[i],cur.qs[j]]=[cur.qs[j],cur.qs[i]];re()}
+function dup(i){cur.qs.splice(i+1,0,JSON.parse(JSON.stringify(Object.assign({},cur.qs[i],{id:uid()}))));re()}
+function del(i){if(confirm('Delete this question?')){cur.qs.splice(i,1);re()}}
+function rg(i){let q=cur.qs[i];cur.qs[i]=q.g?mkG(q.g,q.marks,cur.qs):mk(q.type,cur.topic,cur.diff,q.marks,cur.qs);re()}
+function addq(){let t=$('#nt').value,q={id:uid(),type:t,marks:{mcq:1,short:2,long:5}[t]||1,text:'New question...'};if(t=='mcq'){q.opts=['Option 1','Option 2','Option 3','Option 4'];q.ans=0}cur.qs.push(q);re()}
+function vers(){$('#vers').innerHTML=['A','B','C'].map(v=>`<button class="${cur.ver==v?'p':''}" onclick="sw('${v}')">Version ${v}</button>`).join(' ')}
+function sw(v){if(v==cur.ver)return;cur.vers[cur.ver]=cur.qs;if(!cur.vers[v]){let ex=[];cur.vers[v]=cur.qs.map(q=>{let n=q.g?mkG(q.g,q.marks,ex.concat(cur.qs)):mk(q.type,cur.topic,cur.diff,q.marks,ex.concat(cur.qs));ex.push(n);return n})}cur.ver=v;cur.qs=cur.vers[v];re()}
+function rp(){vers();let T=tot();$('#tot').textContent='Total Marks: '+T+(+cur.marks!=T?' (target '+cur.marks+')':'');let h=`<div class=hd>${cur.logo?`<img class=lg src="${cur.logo}">`:'<div class=lg>🏫</div>'}<h1>${esc(cur.school)}</h1>${cur.addr?`<div>${esc(cur.addr)}</div>`:''}<h2>${esc(cur.exam)}${cur.year?' — '+esc(cur.year):''}</h2></div><div class=meta><div>Class: <b>${esc(cur.cls)}</b></div><div>Subject: <b>${esc(cur.subj)}</b> (Version ${cur.ver})</div><div>Time: <b>${esc(cur.time)}</b></div><div>Total Marks: <b>${T}</b></div><div>Date: <b>${esc(cur.date)}</b></div><div>Topic: <b>${esc(cur.topic)}</b></div><div style="grid-column:1/3">Student Name: ______________________________ &nbsp; Roll No: ______________</div></div><b>Instructions</b><ol style="margin:4px 0">${cur.instr.split('\n').filter(x=>x.trim()).map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`;
+ let ci=0;SECS.forEach(([c0,n,ty])=>{let a=cur.qs.filter(q=>ty.includes(q.type));if(!a.length)return;let c='ABCDE'[ci++];h+=`<div class=sec><span>Section ${c} — ${n}</span><span>${a.reduce((x,q)=>x+(+q.marks||0),0)} Marks</span></div>`+a.map((q,i)=>`<div class=q><div style="flex:1"><b>Q${i+1}.</b> ${esc(q.text)}${dg(q.dg)}${q.opts?`<div class=o>${q.opts.map((o,j)=>`<span>${'ABCD'[j]}. ${esc(o)}</span>`).join('')}</div>`:''}</div><b>[${q.marks}]</b></div>`).join('')});
+ h+=`<div class=pf>${esc(cur.school)} — ${esc(cur.subj)} — End of Paper — Muhammad Mohsin Mushtaq</div>`;if(cur.lang=='اردو')h=ut(h);$('#paper').dir=cur.lang=='اردو'?'rtl':'ltr';$('#paper').innerHTML=h}
+function pdf(){alert('In the print dialog, choose "Save as PDF" as the destination (paper size A4).');window.print()}
+function sv(s){cur.vers[cur.ver]=cur.qs;cur.status=s;cur.saved=Date.now();let c=JSON.parse(JSON.stringify(cur)),i=papers.findIndex(p=>p.id==c.id);i<0?papers.unshift(c):papers[i]=c;S(pk(),papers);cloud(c);alert('Paper saved.')}
+function lp(){let q=$('#sq').value.toLowerCase(),c=$('#fc').value,s=$('#fs').value,fl=papers.filter(p=>(!q||(p.topic+p.subj+p.school+p.exam).toLowerCase().includes(q))&&(!c||p.cls==c)&&(!s||p.subj==s));
+ $('#plist').innerHTML=fl.length?`<div class=grid>${fl.map(p=>`<div class=card><b>${esc(p.topic)} — ${esc(p.subj)}</b><br>Class: ${esc(p.cls)} · ${esc(p.exam)}<br>Total Marks: ${p.qs.reduce((a,x)=>a+(+x.marks||0),0)} · ${p.status=='draft'?'Draft':'Completed'}<br><small style="color:var(--m)">Created: ${new Date(p.created).toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</small><div class=row style="margin-top:8px"><button class=p onclick="op('${p.id}')">Open / Edit</button><button onclick="op('${p.id}',1)">Preview</button><button onclick="op('${p.id}',2)">Download</button><button onclick="cp('${p.id}')">Duplicate</button><button class=d onclick="dl('${p.id}')">Delete</button></div></div>`).join('')}</div>`:'<div class=card>No papers found.</div>'}
+function lpf(){let u=k=>[...new Set(papers.map(p=>p[k]))].filter(Boolean);$('#fc').innerHTML='<option value="">All classes</option>'+u('cls').map(x=>`<option>${esc(x)}</option>`).join('');$('#fs').innerHTML='<option value="">All subjects</option>'+u('subj').map(x=>`<option>${esc(x)}</option>`).join('');lp()}
+function op(id,m){cur=JSON.parse(JSON.stringify(papers.find(p=>p.id==id)));lg=cur.logo||'';go('create');fill(cur);show();if(m==1)$('#paper').scrollIntoView({behavior:'smooth'});if(m==2)setTimeout(pdf,400)}
+function cp(id){let p=JSON.parse(JSON.stringify(papers.find(x=>x.id==id)));p.id=uid();p.created=Date.now();p.topic+=' (Copy)';papers.unshift(p);S(pk(),papers);cloud(p);lpf()}
+function dl(id){if(confirm('Delete this paper?')){papers=papers.filter(p=>p.id!=id);S(pk(),papers);if(db&&user)db.collection('papers').doc(id).delete().catch(()=>{});lpf()}}
+const TP=[['Class Test',20,'30 Minutes'],['Weekly Test',10,'20 Minutes'],['Monthly Test',25,'45 Minutes'],['Mid Term Examination',50,'1 Hour 30 Minutes'],['Final Examination',75,'3 Hours'],['Quiz',10,'15 Minutes'],['Assignment',20,'Take Home'],['Practice Paper',40,'1 Hour 30 Minutes']];
+function tp(){$('#tpl').innerHTML=TP.map((t,i)=>`<div class=card><b>${t[0]}</b><br>${t[1]} marks · ${t[2]}<p><button class=p onclick="nw({exam:'${t[0]}',marks:${t[1]},time:'${t[2]}'})">Use Template</button></p></div>`).join('')}
+const SF=[['school','School Name'],['teacher','Default Teacher Name'],['cls','Default Class'],['subj','Default Subject'],['time','Default Exam Duration']];
+function sfm(){$('#sf').innerHTML=SF.map(([k,n])=>`<div><label>${n}</label><input id="s_${k}" value="${esc(st[k])}"></div>`).join('')+`<div><label>School Logo</label><input type=file accept="image/*" onchange="slg(this)"></div><div style="grid-column:1/-1"><label>Default Instructions</label><textarea id="s_instr" rows=4>${esc(st.instr)}</textarea></div>`}
+function slg(i){let r=new FileReader;r.onload=()=>st.logo=r.result;r.readAsDataURL(i.files[0])}
+function ss(){[...SF.map(x=>x[0]),'instr'].forEach(k=>st[k]=$('#s_'+k).value);S('spg_s',st);alert('Settings saved.')}
+function dash(){let q=papers.reduce((a,p)=>a+p.qs.length,0);$('#stats').innerHTML=[['Total Papers',papers.length],['Saved Drafts',papers.filter(p=>p.status=='draft').length],['Completed Papers',papers.filter(p=>p.status=='done').length],['Total Questions',q]].map(x=>`<div class=card><div class=stat>${x[1]}</div>${x[0]}</div>`).join('')}
+const NAV=[['dash','📊 Dashboard'],['create','➕ Create Paper'],['papers','📁 My Papers'],['drafts','📝 Draft Papers'],['templates','📑 Templates'],['settings','⚙️ Settings'],['about','👤 About Developer']];
+function go(v,keep){if(v=='admin'&&role!='admin')v='dash';if(v=='create'&&!keep&&!cur){nw();return}cv=v;let w=v=='drafts'?'papers':v;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id=='v-'+w));$('#nav').innerHTML=(role=='admin'?NAV.concat([['admin','🛡️ Admin']]):NAV).map(([k,n])=>`<a class="${k==v?'on':''}" onclick="go('${k}')">${n}</a>`).join('');
+ if(w=='dash')dash();if(w=='papers'){$('#pt').textContent=v=='drafts'?'Draft Papers':'My Papers';lpf();if(v=='drafts')$('#sq').value='';}if(w=='admin')adm();if(w=='templates')tp();if(w=='settings')sfm();scrollTo(0,0)}
+function theme(x){let d=x||(document.documentElement.dataset.theme=='dark'?'light':'dark');document.documentElement.dataset.theme=d;S('spg_t',d);$('#tb').textContent=d=='dark'?'☀️ Light':'🌙 Dark'}
+function quick(){let g=k=>$('#q_'+k).value.trim();if(!g('topic')){alert('Please enter a topic / براہ کرم موضوع لکھیں');return}nw({school:g('school')||'Your School Name',cls:g('cls')||'9th',subj:g('subj')||'General',marks:+g('marks')||50,lang:$('#q_lang').value,topic:g('topic'),exam:'Class Test'});generate()}
+function pk(){return 'spg_p'+(user?'_'+user.uid:'')}
+let auth=null,db=null,pn='',amode='in',adminTry=false;
+try{localStorage.removeItem('spg_u');localStorage.removeItem('spg_cu')}catch(e){}
+try{if(window.firebase&&FIREBASE_CONFIG.apiKey!=='YOUR_API_KEY'){firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.firestore()}}catch(e){console.warn(e)}
+function cloud(c){if(db&&user)db.collection('papers').doc(c.id).set({uid:user.uid,topic:c.topic,subj:c.subj,cls:c.cls,marks:c.qs.reduce((a,x)=>a+(+x.marks||0),0),status:c.status,updated:Date.now(),data:JSON.stringify(Object.assign({},c,{logo:''}))}).catch(e=>console.warn(e))}
+function openAuth(m,a){amode=m;adminTry=!!a;setM();$('#lm').style.display='flex'}
+function setM(){let u=amode=='up';$('#phone_box').style.display='none';$('#am_t').textContent=adminTry?'Admin Login':u?'Create Account':'Welcome Back';$('#l_nw').style.display=$('#l_cw').style.display=u?'block':'none';$('#am_b').textContent=u?'Sign Up':'Login';$('#am_g').style.display=$('#am_o').style.display=adminTry?'none':'block';$('#am_tg').innerHTML=adminTry?'':u?`Already have an account? <a style="cursor:pointer;color:var(--p)" onclick="openAuth('in')">Login</a>`:`Don't have an account? <a style="cursor:pointer;color:var(--p)" onclick="openAuth('up')">Sign Up</a>`;$('#l_err').textContent=auth?'':'Firebase is not configured yet. Add your Firebase config in the code. You can continue as Visitor.'}
+async function emailAuth(){let e=$('#l_e').value.trim(),p=$('#l_p').value,n=$('#l_n').value.trim(),er=$('#l_err');er.textContent='';if(!auth){setM();return}
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){er.textContent='Enter a valid email address.';return}
+ if(p.length<8){er.textContent='Password must be at least 8 characters.';return}
+ try{if(amode=='up'){if(!n){er.textContent='Enter your name.';return}if(p!=$('#l_c').value){er.textContent='Passwords do not match.';return}pn=n;let r=await auth.createUserWithEmailAndPassword(e,p);await r.user.updateProfile({displayName:n});if(db)await db.collection('users').doc(r.user.uid).update({name:n}).catch(()=>{});if(user){user.name=n;uh()}}else await auth.signInWithEmailAndPassword(e,p)}catch(x){er.textContent=x.message.replace('Firebase: ','')}}
+async function google(){if(!auth){setM();return}try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){$('#l_err').textContent=x.message.replace('Firebase: ','')}}
+function showPhone(){if(!auth){setM();return}$('#phone_box').style.display='block';$('#l_err').textContent='Phone OTP requires Phone provider enabled in Firebase Authentication.';if(!window.spgRecaptcha){window.spgRecaptcha=new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'normal'}) ;window.spgRecaptcha.render().catch(()=>{})}}
+async function sendPhoneCode(){let phone=$('#l_phone').value.trim(),er=$('#l_err');try{if(!/^\\+[1-9]\\d{7,14}$/.test(phone)){er.textContent='Enter phone with country code, e.g. +923001234567';return}window.spgConfirmation=await auth.signInWithPhoneNumber(phone,window.spgRecaptcha);er.textContent='OTP sent. Check your phone.'}catch(e){er.textContent=e.message.replace('Firebase: ','')}}
+async function verifyPhoneCode(){let code=$('#l_otp').value.trim(),er=$('#l_err');try{if(!window.spgConfirmation){er.textContent='First request an OTP.';return}await window.spgConfirmation.confirm(code)}catch(e){er.textContent=e.message.replace('Firebase: ','')}}
+async function emailLink(){let e=$('#l_e').value.trim(),er=$('#l_err');if(!auth)return setM();if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(e)){er.textContent='Enter your email address first.';return}try{await auth.sendSignInLinkToEmail(e,{url:location.href.split('#')[0],handleCodeInApp:true});localStorage.setItem('spg_email_link',e);er.textContent='Sign-in link sent. Open it from this same device.'}catch(x){er.textContent=x.message.replace('Firebase: ','')}}
+if(auth&&auth.isSignInWithEmailLink(location.href)){let em=localStorage.getItem('spg_email_link');if(!em)em=prompt('Confirm your email address');if(em)auth.signInWithEmailLink(em,location.href).then(()=>localStorage.removeItem('spg_email_link')).catch(e=>alert(e.message))}
+async function forgot(){let e=$('#l_e').value.trim(),er=$('#l_err');if(!auth){setM();return}if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){er.textContent='Enter your email above, then click Forgot Password.';return}try{await auth.sendPasswordResetEmail(e);er.style.color='#2b8a3e';er.textContent='Password reset email sent. Check your inbox.'}catch(x){er.style.color='#d6336c';er.textContent=x.message.replace('Firebase: ','')}}
+function lgn(){user&&auth?auth.signOut():openAuth('in')}
+function uh(){$('#lb').textContent=user?'Logout':'Login';$('#un').innerHTML=user?`${user.photo?`<img src="${esc(user.photo)}" referrerpolicy="no-referrer" style="width:28px;height:28px;border-radius:50%;vertical-align:middle">`:'👤'} <b>${esc(user.name)}</b> <small style="color:var(--m)">${esc(user.email)}${role=='admin'?' · Admin':''}</small>`:''}
+if(auth)auth.onAuthStateChanged(async u=>{let open=$('#lm').style.display=='flex';
+ if(!u){user=null;role='user';papers=L(pk())||[];cur=null;uh();go(cv=='create'||cv=='admin'?'home':cv);return}
+ try{let ref=db.collection('users').doc(u.uid),d=await ref.get(),x;
+  if(!d.exists){x={email:u.email,name:u.displayName||pn||u.email,role:'user',disabled:false,created:Date.now()};await ref.set(x)}else x=d.data();
+  if(x.disabled){await auth.signOut();alert('This account has been disabled by the administrator.');return}
+  if(adminTry&&x.role!='admin'){await auth.signOut();$('#l_err').style.color='#d6336c';$('#l_err').textContent='This account is not an administrator.';return}
+  role=x.role=='admin'?'admin':'user';user={uid:u.uid,email:u.email,name:x.name||u.displayName||u.email,photo:u.photoURL};
+  papers=L(pk())||[];try{let r=await db.collection('papers').where('uid','==',u.uid).get();r.forEach(z=>{let p=JSON.parse(z.data().data);if(!papers.some(y=>y.id==p.id))papers.push(p)});S(pk(),papers)}catch(e){}
+  $('#lm').style.display='none';let wasAdmin=adminTry;adminTry=false;cur=null;uh();go(open?(wasAdmin&&role=='admin'?'admin':'dash'):(cv=='create'||cv=='admin'?'home':cv))}catch(e){alert('Could not load your profile: '+e.message);await auth.signOut()}});
+async function adm(){let c=$('#admc');if(role!='admin'||!db){c.textContent='Access denied.';return}c.textContent='Loading...';
+ try{let us=await db.collection('users').limit(200).get(),ps=await db.collection('papers').limit(500).get(),U=us.docs.map(d=>Object.assign({id:d.id},d.data())),P=ps.docs.map(d=>d.data());
+ c.innerHTML=`<div class=grid><div class=card><div class=stat>${U.length}</div>Registered users</div><div class=card><div class=stat>${P.length}</div>Saved papers</div><div class=card><div class=stat>${U.filter(x=>x.disabled).length}</div>Disabled users</div></div><div class=card style="overflow-x:auto"><b>Users</b><table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th align=left>Name</th><th align=left>Email</th><th>Role</th><th>Papers</th><th></th></tr>${U.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td align=center>${esc(x.role)}</td><td align=center>${P.filter(p=>p.uid==x.id).length}</td><td>${x.id==user.uid?'':`<button onclick="tg('${x.id}',${!x.disabled})">${x.disabled?'Enable':'Disable'}</button>`}</td></tr>`).join('')}</table></div><div class=card><b>Saved papers</b><ul>${P.map(p=>`<li>${esc(p.topic)} — ${esc(p.subj)} (${esc(p.cls)}) · ${esc((U.find(x=>x.id==p.uid)||{}).email||'')}</li>`).join('')||'<li>None yet</li>'}</ul></div>`}catch(e){c.textContent='Error: '+e.message}}
+async function tg(id,v){try{await db.collection('users').doc(id).update({disabled:v})}catch(e){alert(e.message)}adm()}
+buildForm();theme(L('spg_t')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+if(!papers){papers=[];nw({school:'The Iqra Islamic Educational System',cls:'9th',subj:'Biology',topic:'Human Heart',exam:'Class Test',marks:50,time:'1 Hour 30 Minutes',teacher:'Demo Teacher'});generate();cur.status='done';sv0()}
+function sv0(){cur.vers[cur.ver]=cur.qs;papers=[JSON.parse(JSON.stringify(cur))];S(pk(),papers);cur=null}
+$('#work').style.display='none';uh();go('home');document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id=='v-home'));
+</script></body></html>
