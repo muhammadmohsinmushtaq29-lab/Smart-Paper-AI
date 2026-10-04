@@ -246,28 +246,3 @@ if(!papers){papers=[];nw({school:'The Iqra Islamic Educational System',cls:'9th'
 function sv0(){cur.vers[cur.ver]=cur.qs;papers=[JSON.parse(JSON.stringify(cur))];S(pk(),papers);cur=null}
 $('#work').style.display='none';uh();go('home');document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id=='v-home'));
 </script></body></html>
-
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{db}/documents {
-    function signedIn() { return request.auth != null; }
-    function me() { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
-    function isAdmin() { return signedIn() && me().role == 'admin'; }
-    function active() { return signedIn() && me().disabled != true; }
-
-    match /users/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      // new accounts can only ever be created as a normal, enabled user
-      allow create: if request.auth.uid == uid && request.resource.data.role == 'user' && request.resource.data.disabled == false;
-      // a user may change only their own name; an admin may change anything except role
-      allow update: if (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']))
-                    || (isAdmin() && request.resource.data.role == resource.data.role);
-      allow delete: if false;
-    }
-    match /papers/{id} {
-      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
-      allow create: if active() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if active() && resource.data.uid == request.auth.uid;
-    }
-  }
-}
