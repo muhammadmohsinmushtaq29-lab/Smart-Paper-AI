@@ -35,90 +35,6 @@ footer{text-align:center;padding:20px;color:var(--m);font-size:13px;border-top:1
 #paper[dir=rtl]{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Noto Naskh Arabic",Tahoma,serif;line-height:2.2}#paper[dir=rtl] .o{margin:2px 20px 0 0}
 @page{size:A4;margin:14mm;@bottom-center{content:"Page " counter(page)}}
 @media print{body *{visibility:hidden}#paper,#paper *{visibility:visible}#paper{position:absolute;left:0;top:0;box-shadow:none;max-width:none;padding:0}}
-
-/* Premium motion + subtle 3D interaction layer */
-:root{--motion-ease:cubic-bezier(.2,.8,.2,1)}
-.card,button,.hero h1,.hero>div:first-child{transform-style:preserve-3d}
-.card{transition:transform .35s var(--motion-ease),box-shadow .35s var(--motion-ease)}
-.card:hover{transform:perspective(900px) translateY(-3px) rotateX(.6deg);box-shadow:0 14px 32px rgba(35,55,120,.12)}
-button{transition:transform .22s var(--motion-ease),box-shadow .22s,border-color .2s}
-button:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(59,91,219,.16)}
-button:active{transform:translateY(1px) scale(.98)}
-.hero h1{animation:riseIn .75s var(--motion-ease) both}
-.hero>div:first-child{animation:float3d 4s ease-in-out infinite;filter:drop-shadow(0 12px 12px rgba(59,91,219,.15))}
-.view.on{animation:viewIn .38s var(--motion-ease) both}
-nav a{transition:transform .2s,background .2s}nav a:hover{transform:translateX(3px)}
-@keyframes riseIn{from{opacity:0;transform:translateY(18px) rotateX(-8deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
-@keyframes viewIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
-@keyframes float3d{0%,100%{transform:perspective(500px) rotateY(-5deg) translateY(0)}50%{transform:perspective(500px) rotateY(5deg) translateY(-8px)}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
-
-/* CSS polish: responsive layout, consistent controls, accessible motion */
-:root {
-  color-scheme: light;
-  --ui-radius: 14px;
-  --ui-shadow: 0 10px 28px rgba(15, 23, 42, .08);
-}
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  min-width: 320px;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-img, svg, canvas, video { max-width: 100%; }
-button, input, select, textarea { font: inherit; }
-button, .btn, input[type="button"], input[type="submit"] {
-  cursor: pointer;
-  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
-}
-button:hover, .btn:hover, input[type="button"]:hover, input[type="submit"]:hover {
-  transform: translateY(-1px);
-}
-button:focus-visible, input:focus-visible, select:focus-visible,
-textarea:focus-visible, a:focus-visible {
-  outline: 3px solid rgba(59, 130, 246, .55);
-  outline-offset: 2px;
-}
-input, select, textarea {
-  max-width: 100%;
-  min-width: 0;
-}
-.card, .panel, .modal, .paper-preview {
-  border-radius: var(--ui-radius);
-  box-shadow: var(--ui-shadow);
-}
-table { width: 100%; border-collapse: collapse; }
-.table-wrap, .table-responsive { max-width: 100%; overflow-x: auto; }
-@media (max-width: 900px) {
-  .container, .main-container, .app-container { width: min(100% - 28px, 100%); }
-  .sidebar { max-width: 100%; }
-  .main-layout, .dashboard-layout, .content-layout {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-}
-@media (max-width: 600px) {
-  body { font-size: 14px; }
-  .container, .main-container, .app-container { width: calc(100% - 20px); }
-  .header, header, .topbar { flex-wrap: wrap; gap: 10px; }
-  .actions, .button-group, .toolbar { flex-wrap: wrap; }
-  button, .btn { max-width: 100%; }
-  .modal, .dialog { width: calc(100% - 20px) !important; max-height: 90dvh; overflow: auto; }
-  .form-grid, .settings-grid, .generator-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-  .paper-preview { overflow-wrap: anywhere; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-  }
-}
-
 </style></head><body>
 <header><span style="font-size:24px">🎓</span><b>School Paper Generator</b><span class="sp"></span><span id="un"></span><button onclick="lgn()" id="lb">Login</button><button onclick="theme()" id="tb">🌙 Dark</button></header>
 <div class="layout"><nav id="nav"></nav><main>
@@ -140,8 +56,7 @@ table { width: 100%; border-collapse: collapse; }
 <footer><b>School Paper Generator</b><br>Create • Edit • Save • Print • Download<br>Developed by Muhammad Mohsin Mushtaq<br>© 2026 Muhammad Mohsin Mushtaq — All Rights Reserved.</footer>
 <div id="lm" style="display:none;position:fixed;inset:0;background:rgba(15,20,40,.6);z-index:20;align-items:center;justify-content:center;padding:12px;overflow:auto"><div class="card" style="width:min(400px,100%);margin:auto;padding:26px"><div style="text-align:center"><div style="font-size:34px">🎓</div><b>SCHOOL PAPER GENERATOR</b><h2 id="am_t" style="margin:8px 0 14px">Welcome Back</h2></div>
 <button id="am_g" class="big" style="width:100%" onclick="google()">🔵 Continue with Google</button><div id="am_o" style="text-align:center;color:var(--m);margin:10px 0">OR</div>
-<div style="display:grid;gap:8px"><div id="l_nw" style="display:none"><label>Name</label><input id="l_n" autocomplete="name"></div><div><label>Email</label><input id="l_e" type="email" autocomplete="email"></div><div><label>Password</label><input id="l_p" type="password" autocomplete="current-password"></div><div id="l_cw" style="display:none"><label>Confirm Password</label><input id="l_c" type="password" autocomplete="new-password"></div><div id="phone_box" style="display:none"><label>Phone Number (with country code)</label><input id="l_phone" type="tel" placeholder="+923001234567"><div id="recaptcha-container"></div><button type="button" onclick="sendPhoneCode()">Send OTP</button><label style="margin-top:8px">Verification Code</label><input id="l_otp" inputmode="numeric" placeholder="6-digit OTP"><button type="button" onclick="verifyPhoneCode()">Verify Phone</button></div></div>
-<div class="row" style="gap:6px;margin-top:10px;flex-wrap:wrap"><button type="button" onclick="showPhone()">Phone OTP</button><button type="button" onclick="emailLink()">Email Magic Link</button></div>
+<div style="display:grid;gap:8px"><div id="l_nw" style="display:none"><label>Name</label><input id="l_n" autocomplete="name"></div><div><label>Email</label><input id="l_e" type="email" autocomplete="email"></div><div><label>Password</label><input id="l_p" type="password" autocomplete="current-password"></div><div id="l_cw" style="display:none"><label>Confirm Password</label><input id="l_c" type="password" autocomplete="new-password"></div></div>
 <p id="l_err" style="color:#d6336c;font-size:13px;min-height:18px;margin:8px 0"></p><button id="am_b" class="p big" style="width:100%" onclick="emailAuth()">Login</button>
 <p style="text-align:center;margin:10px 0 0"><a onclick="forgot()" style="cursor:pointer;color:var(--p)">Forgot Password?</a></p><p id="am_tg" style="text-align:center;margin:6px 0"></p>
 <p style="text-align:center;font-size:13px;margin:6px 0"><a onclick="openAuth('in',1)" style="cursor:pointer;color:var(--m)">Admin Login</a> · <a onclick="$('#lm').style.display='none'" style="cursor:pointer;color:var(--m)">Continue as Visitor</a></p></div></div>
@@ -304,17 +219,12 @@ try{localStorage.removeItem('spg_u');localStorage.removeItem('spg_cu')}catch(e){
 try{if(window.firebase&&FIREBASE_CONFIG.apiKey!=='YOUR_API_KEY'){firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.firestore()}}catch(e){console.warn(e)}
 function cloud(c){if(db&&user)db.collection('papers').doc(c.id).set({uid:user.uid,topic:c.topic,subj:c.subj,cls:c.cls,marks:c.qs.reduce((a,x)=>a+(+x.marks||0),0),status:c.status,updated:Date.now(),data:JSON.stringify(Object.assign({},c,{logo:''}))}).catch(e=>console.warn(e))}
 function openAuth(m,a){amode=m;adminTry=!!a;setM();$('#lm').style.display='flex'}
-function setM(){let u=amode=='up';$('#phone_box').style.display='none';$('#am_t').textContent=adminTry?'Admin Login':u?'Create Account':'Welcome Back';$('#l_nw').style.display=$('#l_cw').style.display=u?'block':'none';$('#am_b').textContent=u?'Sign Up':'Login';$('#am_g').style.display=$('#am_o').style.display=adminTry?'none':'block';$('#am_tg').innerHTML=adminTry?'':u?`Already have an account? <a style="cursor:pointer;color:var(--p)" onclick="openAuth('in')">Login</a>`:`Don't have an account? <a style="cursor:pointer;color:var(--p)" onclick="openAuth('up')">Sign Up</a>`;$('#l_err').textContent=auth?'':'Firebase is not configured yet. Add your Firebase config in the code. You can continue as Visitor.'}
+function setM(){let u=amode=='up';$('#am_t').textContent=adminTry?'Admin Login':u?'Create Account':'Welcome Back';$('#l_nw').style.display=$('#l_cw').style.display=u?'block':'none';$('#am_b').textContent=u?'Sign Up':'Login';$('#am_g').style.display=$('#am_o').style.display=adminTry?'none':'block';$('#am_tg').innerHTML=adminTry?'':u?`Already have an account? <a style="cursor:pointer;color:var(--p)" onclick="openAuth('in')">Login</a>`:`Don't have an account? <a style="cursor:pointer;color:var(--p)" onclick="openAuth('up')">Sign Up</a>`;$('#l_err').textContent=auth?'':'Firebase is not configured yet. Add your Firebase config in the code. You can continue as Visitor.'}
 async function emailAuth(){let e=$('#l_e').value.trim(),p=$('#l_p').value,n=$('#l_n').value.trim(),er=$('#l_err');er.textContent='';if(!auth){setM();return}
  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){er.textContent='Enter a valid email address.';return}
  if(p.length<8){er.textContent='Password must be at least 8 characters.';return}
  try{if(amode=='up'){if(!n){er.textContent='Enter your name.';return}if(p!=$('#l_c').value){er.textContent='Passwords do not match.';return}pn=n;let r=await auth.createUserWithEmailAndPassword(e,p);await r.user.updateProfile({displayName:n});if(db)await db.collection('users').doc(r.user.uid).update({name:n}).catch(()=>{});if(user){user.name=n;uh()}}else await auth.signInWithEmailAndPassword(e,p)}catch(x){er.textContent=x.message.replace('Firebase: ','')}}
 async function google(){if(!auth){setM();return}try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){$('#l_err').textContent=x.message.replace('Firebase: ','')}}
-function showPhone(){if(!auth){setM();return}$('#phone_box').style.display='block';$('#l_err').textContent='Phone OTP requires Phone provider enabled in Firebase Authentication.';if(!window.spgRecaptcha){window.spgRecaptcha=new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'normal'}) ;window.spgRecaptcha.render().catch(()=>{})}}
-async function sendPhoneCode(){let phone=$('#l_phone').value.trim(),er=$('#l_err');try{if(!/^\\+[1-9]\\d{7,14}$/.test(phone)){er.textContent='Enter phone with country code, e.g. +923001234567';return}window.spgConfirmation=await auth.signInWithPhoneNumber(phone,window.spgRecaptcha);er.textContent='OTP sent. Check your phone.'}catch(e){er.textContent=e.message.replace('Firebase: ','')}}
-async function verifyPhoneCode(){let code=$('#l_otp').value.trim(),er=$('#l_err');try{if(!window.spgConfirmation){er.textContent='First request an OTP.';return}await window.spgConfirmation.confirm(code)}catch(e){er.textContent=e.message.replace('Firebase: ','')}}
-async function emailLink(){let e=$('#l_e').value.trim(),er=$('#l_err');if(!auth)return setM();if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(e)){er.textContent='Enter your email address first.';return}try{await auth.sendSignInLinkToEmail(e,{url:location.href.split('#')[0],handleCodeInApp:true});localStorage.setItem('spg_email_link',e);er.textContent='Sign-in link sent. Open it from this same device.'}catch(x){er.textContent=x.message.replace('Firebase: ','')}}
-if(auth&&auth.isSignInWithEmailLink(location.href)){let em=localStorage.getItem('spg_email_link');if(!em)em=prompt('Confirm your email address');if(em)auth.signInWithEmailLink(em,location.href).then(()=>localStorage.removeItem('spg_email_link')).catch(e=>alert(e.message))}
 async function forgot(){let e=$('#l_e').value.trim(),er=$('#l_err');if(!auth){setM();return}if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){er.textContent='Enter your email above, then click Forgot Password.';return}try{await auth.sendPasswordResetEmail(e);er.style.color='#2b8a3e';er.textContent='Password reset email sent. Check your inbox.'}catch(x){er.style.color='#d6336c';er.textContent=x.message.replace('Firebase: ','')}}
 function lgn(){user&&auth?auth.signOut():openAuth('in')}
 function uh(){$('#lb').textContent=user?'Logout':'Login';$('#un').innerHTML=user?`${user.photo?`<img src="${esc(user.photo)}" referrerpolicy="no-referrer" style="width:28px;height:28px;border-radius:50%;vertical-align:middle">`:'👤'} <b>${esc(user.name)}</b> <small style="color:var(--m)">${esc(user.email)}${role=='admin'?' · Admin':''}</small>`:''}
@@ -336,3 +246,28 @@ if(!papers){papers=[];nw({school:'The Iqra Islamic Educational System',cls:'9th'
 function sv0(){cur.vers[cur.ver]=cur.qs;papers=[JSON.parse(JSON.stringify(cur))];S(pk(),papers);cur=null}
 $('#work').style.display='none';uh();go('home');document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id=='v-home'));
 </script></body></html>
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
+    function isAdmin() { return signedIn() && me().role == 'admin'; }
+    function active() { return signedIn() && me().disabled != true; }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // new accounts can only ever be created as a normal, enabled user
+      allow create: if request.auth.uid == uid && request.resource.data.role == 'user' && request.resource.data.disabled == false;
+      // a user may change only their own name; an admin may change anything except role
+      allow update: if (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']))
+                    || (isAdmin() && request.resource.data.role == resource.data.role);
+      allow delete: if false;
+    }
+    match /papers/{id} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if active() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if active() && resource.data.uid == request.auth.uid;
+    }
+  }
+}
